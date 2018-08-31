@@ -1,6 +1,7 @@
 // Dependencies
 const http = require('http');
 const url = require('url');
+const StringDecoder = require('string_decoder').StringDecoder;
 
 const server = http.createServer((req,res) => {
   //get url
@@ -19,13 +20,64 @@ const server = http.createServer((req,res) => {
   //get query params
   const queryParams = parsedUrl.query;
 
-  //send response
-  res.end("Hello world\n");
+  //get payload if it exist
+  const decoder = new StringDecoder('utf-8');
+  let buffer = '';
 
-  //log the request
-  console.log(headers);
+  req.on('data', (data) => {
+    buffer += decoder.write(data);
+  })
+
+  req.on('end', () => {
+    buffer += decoder.end();
+
+    //choose a handler
+    let choosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
+
+    //constuct the data object for handler
+    const data = {
+      'trimmedPath': trimmedPath,
+      'method': method,
+      'headers': headers,
+      'queryParams': queryParams,
+      'payload': buffer
+    }
+
+    //route the request
+    choosenHandler(data, (statusCode, payload) => {
+      statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+      payload = typeof(payload) == 'object' ? payload : {};
+      let payloadString = JSON.stringify(payload);
+
+      //send response
+      res.setHeader('Content-Type', 'application/json');
+      res.writeHead(statusCode);
+      res.end(payloadString);
+
+      //log the request
+      console.log(`Returning this result: ${statusCode}, ${payloadString}`);
+    });
+  })
 });
 
 server.listen(3000, () => {
   console.log("server listening now");
 })
+
+//define the handlers
+const handlers = {};
+
+//sample handler
+handlers.sample = (data, callback) => {
+  //callback http status code and a payload object
+  callback(406, {'name': 'sample handler'});
+};
+
+//not found handler
+handlers.notFound = (data, callback) => {
+  callback(404);
+};
+
+const router = {
+  'sample': handlers.sample
+}
