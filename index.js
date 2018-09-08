@@ -5,11 +5,18 @@ const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./config');
 const fs = require('fs');
+const _data = require('./lib/data');
 
 //Instatiate the HTTP server
 const httpServer = http.createServer((req,res) => {
   unifiedServer(req, res);
 });
+
+//Testing
+// @TODO delete this
+_data.create('test', 'newFile', {'foo': 'bar'}, (err) => {
+  console.log(`this was the error ${err}`);
+})
 
 // Start the HTTP server
 httpServer.listen(config.httpPort, () => {
@@ -91,9 +98,8 @@ const unifiedServer = (req, res) => {
 const handlers = {};
 
 //sample handler
-handlers.sample = (data, callback) => {
-  //callback http status code and a payload object
-  callback(406, {'name': 'sample handler'});
+handlers.ping = (data, callback) => {
+  callback(200);
 };
 
 //not found handler
@@ -102,5 +108,5 @@ handlers.notFound = (data, callback) => {
 };
 
 const router = {
-  'sample': handlers.sample
+  'ping': handlers.ping
 }
