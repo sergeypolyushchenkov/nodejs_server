@@ -14,7 +14,7 @@ const httpServer = http.createServer((req,res) => {
 
 //Testing
 // @TODO delete this
-_data.create('test', 'newFile', {'foo': 'bar'}, (err) => {
+_data.delete('test', 'test', (err) => {
   console.log(`this was the error ${err}`);
 })
 
