@@ -6,18 +6,13 @@ const StringDecoder = require('string_decoder').StringDecoder;
 const config = require('./lib/config');
 const fs = require('fs');
 const _data = require('./lib/data');
+const helpers = require('./lib/helpers');
 const handlers = require('./lib/handlers');
 
 //Instatiate the HTTP server
 const httpServer = http.createServer((req,res) => {
   unifiedServer(req, res);
 });
-
-//Testing
-// @TODO delete this
-_data.delete('test', 'test', (err) => {
-  console.log(`this was the error ${err}`);
-})
 
 // Start the HTTP server
 httpServer.listen(config.httpPort, () => {
